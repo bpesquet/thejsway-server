@@ -5,6 +5,7 @@ const multer = require("multer");
 const app = express();
 const upload = multer();
 const jsonParser = bodyParser.json();
+const Sequelize = require("sequelize");
 
 // Enable CORS (see https://enable-cors.org/server_expressjs.html)
 app.use((req, res, next) => {
@@ -15,6 +16,29 @@ app.use((req, res, next) => {
   );
   next();
 });
+
+const sequelize = new Sequelize("database", "", "", {
+  host: "localhost",
+  dialect: "sqlite",
+  pool: {
+    max: 5,
+    min: 0,
+    idle: 10000
+  },
+  storage: ".data/database.sqlite"
+});
+const Testimony = sequelize.define("Testimony", {
+  name: {
+    type: Sequelize.STRING
+  },
+  rating: {
+    type: Sequelize.INTEGER
+  },
+  comment: {
+    type: Sequelize.STRING
+  }
+});
+Testimony.sync().then();
 
 const articles = [
   { id: 1, title: "First article", content: "Hello World!" },
@@ -31,6 +55,12 @@ const articles = [
       "J’en dis autant de ceux qui, par mollesse d’esprit, c’est-à-dire par la crainte de la peine et de la douleur, manquent aux devoirs de la vie. Et il est très facile de rendre raison de ce que j’avance."
   }
 ];
+
+app.get("/", (request, response) => {
+  Testimony.findAll().then(testimonies => {
+    response.send(testimonies);
+  });
+});
 
 app.get("/api/articles", (request, response) => {
   response.json(articles);
@@ -61,7 +91,11 @@ app.post("/articles", upload.array(), (request, response) => {
   const title = request.body.title;
   const content = request.body.content;
   articles.push({ title, content });
-  response.send("New article added successfully");
+  response.send("New article added successfully!");
+});
+
+app.post("/api/testimony", jsonParser, (request, response) => {
+  const testimony = request.body;
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
