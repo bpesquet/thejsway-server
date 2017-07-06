@@ -32,8 +32,6 @@ const articles = [
   }
 ];
 
-const testimonies = [];
-
 // Web routes
 
 app.get("/", (request, response) => {
@@ -65,19 +63,17 @@ app.get("/api/articles", (request, response) => {
   response.json(articles);
 });
 
-app.get("/api/testimonies", (request, response) => {
-  response.json(testimonies);
-});
-
 app.post("/api/cars", jsonParser, (request, response) => {
   const cars = request.body;
   response.send(`You sent me a list of cars: ${JSON.stringify(cars)}`);
 });
 
-app.post("/api/testimony", jsonParser, (request, response) => {
-  const testimony = request.body;
-  testimonies.push(testimony);
-  response.send("Thanks for your feedback.");
+app.post("/api/countries", jsonParser, (request, response) => {
+  const traveler = request.body;
+  response.send(
+    `Your name is ${traveler.name} and you visited ${traveler.countries
+      .length} countries. Keep traveling!`
+  );
 });
 
 // Start listening to incoming requests
