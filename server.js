@@ -5,7 +5,6 @@ const multer = require("multer");
 const app = express();
 const upload = multer();
 const jsonParser = bodyParser.json();
-const Sequelize = require("sequelize");
 
 // Enable CORS (see https://enable-cors.org/server_expressjs.html)
 app.use((req, res, next) => {
@@ -16,29 +15,6 @@ app.use((req, res, next) => {
   );
   next();
 });
-
-const sequelize = new Sequelize("database", "", "", {
-  host: "localhost",
-  dialect: "sqlite",
-  pool: {
-    max: 5,
-    min: 0,
-    idle: 10000
-  },
-  storage: ".data/database.sqlite"
-});
-const Testimony = sequelize.define("Testimony", {
-  name: {
-    type: Sequelize.STRING
-  },
-  rating: {
-    type: Sequelize.INTEGER
-  },
-  comment: {
-    type: Sequelize.STRING
-  }
-});
-Testimony.sync().then();
 
 const articles = [
   { id: 1, title: "First article", content: "Hello World!" },
@@ -56,37 +32,26 @@ const articles = [
   }
 ];
 
+const testimonies = [];
+
+// Web routes
+
 app.get("/", (request, response) => {
-  Testimony.findAll().then(testimonies => {
-    response.send(testimonies);
-  });
+  response.send("Hello World!");
 });
 
-app.get("/api/articles", (request, response) => {
-  response.json(articles);
-});
-
-// Expect form data
 app.post("/tshirt", upload.array(), (request, response) => {
   const size = request.body.size;
   const color = request.body.color;
   response.send(`Command received! Size: ${size}, color: ${color}`);
 });
 
-// Expect form data
 app.post("/animals", upload.array(), (request, response) => {
   const name = request.body.name;
   const vote = request.body.strongest;
   response.send(`Hello ${name}, you voted: ${vote}`);
 });
 
-// Expect JSON data
-app.post("/cars", jsonParser, (request, response) => {
-  const cars = request.body;
-  response.send(`You sent me a list of cars: ${JSON.stringify(cars)}`);
-});
-
-// Expect form data
 app.post("/articles", upload.array(), (request, response) => {
   const title = request.body.title;
   const content = request.body.content;
@@ -94,10 +59,28 @@ app.post("/articles", upload.array(), (request, response) => {
   response.send("New article added successfully!");
 });
 
-app.post("/api/testimony", jsonParser, (request, response) => {
-  const testimony = request.body;
+// JSON API
+
+app.get("/api/articles", (request, response) => {
+  response.json(articles);
 });
 
+app.get("/api/testimonies", (request, response) => {
+  response.json(testimonies);
+});
+
+app.post("/api/cars", jsonParser, (request, response) => {
+  const cars = request.body;
+  response.send(`You sent me a list of cars: ${JSON.stringify(cars)}`);
+});
+
+app.post("/api/testimony", jsonParser, (request, response) => {
+  const testimony = request.body;
+  testimonies.push(testimony);
+  response.send("Thanks for your feedback.");
+});
+
+// Start listening to incoming requests
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log(`Your app is listening on port ${listener.address().port}`);
 });
