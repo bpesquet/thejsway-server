@@ -1,6 +1,6 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 const multer = require("multer");
+const bodyParser = require("body-parser");
 
 const app = express();
 const upload = multer();
@@ -34,8 +34,9 @@ const articles = [
 
 // Web routes
 
+// Return a string for requests to the root URL ("/")
 app.get("/", (request, response) => {
-  response.send("Hello World!");
+  response.send("Hello from Express!");
 });
 
 app.post("/tshirt", upload.array(), (request, response) => {
@@ -59,6 +60,7 @@ app.post("/articles", upload.array(), (request, response) => {
 
 // JSON API
 
+// Return the articles list in JSON format
 app.get("/api/articles", (request, response) => {
   response.json(articles);
 });
@@ -77,6 +79,7 @@ app.post("/api/countries", jsonParser, (request, response) => {
 });
 
 // Start listening to incoming requests
+// If process.env.PORT is not defined, port number 3000 is used
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log(`Your app is listening on port ${listener.address().port}`);
 });
