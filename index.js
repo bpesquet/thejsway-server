@@ -16,6 +16,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// Serve content of the "public" subfolder directly
+app.use(express.static("public"));
+
+// Define an article list
 const articles = [
   { id: 1, title: "First article", content: "Hello World!" },
   {
@@ -34,15 +38,12 @@ const articles = [
 
 // Web routes
 
-// Return a string for requests to the root URL ("/")
 app.get("/", (request, response) => {
   response.send("Hello from Express!");
 });
 
-app.post("/tshirt", upload.array(), (request, response) => {
-  const size = request.body.size;
-  const color = request.body.color;
-  response.send(`Command received! Size: ${size}, color: ${color}`);
+app.get("/hello", (request, response) => {
+  response.sendFile(`${__dirname}/views/hello.html`);
 });
 
 app.post("/animals", upload.array(), (request, response) => {
@@ -51,16 +52,31 @@ app.post("/animals", upload.array(), (request, response) => {
   response.send(`Hello ${name}, you voted: ${vote}`);
 });
 
+app.post("/tshirt", upload.array(), (request, response) => {
+  const size = request.body.size;
+  const color = request.body.color;
+  response.send(`Command received! Size: ${size}, color: ${color}`);
+});
+
 app.post("/articles", upload.array(), (request, response) => {
   const title = request.body.title;
   const content = request.body.content;
-  articles.push({ title, content });
-  response.send("New article added successfully!");
+  // Create a new array containing only ids
+  const idList = articles.map(article => article.id);
+  // Reducing the array to the maximum id value
+  const maxId = idList.reduce((acc, value) => {
+    if (value > acc) return value;
+    return acc;
+    // Or: (value > acc) ? value : acc;
+  });
+  const id = maxId + 1;
+  // Add new article to the list
+  articles.push({ id, title, content });
+  response.send(`New article added successfully with ID ${id}!`);
 });
 
 // JSON API
 
-// Return the articles list in JSON format
 app.get("/api/articles", (request, response) => {
   response.json(articles);
 });
